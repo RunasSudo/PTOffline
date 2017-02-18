@@ -26,12 +26,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -73,14 +75,45 @@ public class PtvProvider extends AbstractNetworkProvider
 		}
 	}
 
+	String unquote(String str) {
+		// Regex replace is *very* expensive
+		if (str.startsWith("\"")) {
+			str = str.substring(1);
+		}
+		if (str.endsWith("\"")) {
+			str = str.substring(0, str.length() - 1);
+		}
+		return str;
+	}
+
+	class WorkingNearbyLocation {
+		Location location;
+		double distance;
+
+		WorkingNearbyLocation(Location location, double distance) {
+			this.location = location;
+			this.distance = distance;
+		}
+	}
+
 	public NearbyLocationsResult queryNearbyLocations(EnumSet<LocationType> types, Location location, int maxDistance,
 	                                           int maxLocations) throws IOException {
-		ArrayList<Location> locations = new ArrayList<Location>();
+		if (maxDistance <= 0) {
+			maxDistance = 50000;
+		}
+
+		// TreeSet is sorted, so we can keep only the "maxLocations" closest in memory
+		TreeSet<WorkingNearbyLocation> locations = new TreeSet<WorkingNearbyLocation>(new Comparator<WorkingNearbyLocation>() {
+			public int compare(WorkingNearbyLocation l1, WorkingNearbyLocation l2) {
+				return (int) (l1.distance - l2.distance);
+			}
+		});
 
 		File cacheDir = TransportrApplication.getAppContext().getCacheDir();
 
 		ZipFile zipFile = new ZipFile("/sdcard/gtfs.zip");
 		Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
+		//while (locations.size() < maxLocations && zipEntries.hasMoreElements()) {
 		while (zipEntries.hasMoreElements()) {
 			ZipEntry zipEntry = zipEntries.nextElement();
 			if(!zipEntry.isDirectory()) {
@@ -102,32 +135,42 @@ public class PtvProvider extends AbstractNetworkProvider
 				ZipEntry stopsEntry = gtfsZip.getEntry("stops.txt");
 				BufferedReader stopsReader = new BufferedReader(new InputStreamReader(gtfsZip.getInputStream(stopsEntry)));
 
-				String line = stopsReader.readLine().substring(1); // TODO: Handle BOM gracefully
-				System.out.println(line);
+				String line = stopsReader.readLine();
+				// Handle BOM
+				if (line.startsWith("\ufeff")) {
+					line = line.substring(1);
+				}
+				//System.out.println(line);
 				List<String> cols = Arrays.asList(line.split(","));
 				int col_stop_id = cols.indexOf("stop_id");
 				int col_stop_name = cols.indexOf("stop_name");
 				int col_stop_lat = cols.indexOf("stop_lat");
 				int col_stop_lon = cols.indexOf("stop_lon");
 
-				System.out.println(col_stop_id);
-				System.out.println(col_stop_name);
-				System.out.println(col_stop_lat);
-				System.out.println(col_stop_lon);
-
 				try {
+					//while(locations.size() < maxLocations && (line = stopsReader.readLine()) != null) {
 					while((line = stopsReader.readLine()) != null) {
-						System.out.println(line);
+						//System.out.println(line);
 						String[] bits = line.split(",");
-						double lat = Double.parseDouble(bits[col_stop_lat].replaceAll("\"", "")); // TODO: Handle quotes gracefully
-						double lon = Double.parseDouble(bits[col_stop_lon].replaceAll("\"", ""));
+						double lat = Double.parseDouble(unquote(bits[col_stop_lat])); // TODO: Handle quotes gracefully
+						double lon = Double.parseDouble(unquote(bits[col_stop_lon]));
 						Point point = Point.fromDouble(lat, lon);
 						Location stopLocation = Location.coord(point);
-						//if(TransportrUtils.computeDistance(location, stopLocation) <= maxDistance) {
-							String id = bits[col_stop_id].replaceAll("\"", "");
-							String name = bits[col_stop_name].replaceAll("\"", "");
-							locations.add(new Location(LocationType.STATION, id, point, null, name));
-						//}
+						double distance = TransportrUtils.computeDistance(location, stopLocation);
+						if(distance <= maxDistance) {
+							String id = unquote(bits[col_stop_id]);
+							String name = unquote(bits[col_stop_name]);
+							Location stop = new Location(LocationType.STATION, id, point, null, name);
+							if (locations.size() < maxLocations) {
+								locations.add(new WorkingNearbyLocation(stop, distance));
+							} else {
+								WorkingNearbyLocation currentMax = locations.last();
+								if (distance < currentMax.distance) {
+									locations.pollLast();
+									locations.add(new WorkingNearbyLocation(stop, distance));
+								}
+							}
+						}
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -135,13 +178,17 @@ public class PtvProvider extends AbstractNetworkProvider
 				stopsReader.close();
 				gtfsFile.delete();
 
-				break;
+				//break;
 			}
 		}
 
-		// NYI
+		ArrayList<Location> locationsList = new ArrayList<Location>();
+		for (WorkingNearbyLocation workingLocation : locations) {
+			locationsList.add(workingLocation.location);
+		}
+
 		final ResultHeader resultHeader = new ResultHeader(network, "PTOffline");
-		return new NearbyLocationsResult(resultHeader, locations);
+		return new NearbyLocationsResult(resultHeader, locationsList);
 	}
 
 	public QueryDeparturesResult queryDepartures(String stationId, @Nullable Date time, int maxDepartures, boolean equivs)
