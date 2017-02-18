@@ -23,9 +23,13 @@ import android.content.Context;
 public class TransportrApplication extends Application {
 	private TransportNetworks networks;
 
+	private static Context context;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
+
+		context = getApplicationContext();
 
 		initializeNetworks(getBaseContext());
 	}
@@ -39,6 +43,10 @@ public class TransportrApplication extends Application {
 		if(networks == null) initializeNetworks(context);
 
 		return networks;
+	}
+
+	public static Context getAppContext() {
+		return context;
 	}
 
 }
