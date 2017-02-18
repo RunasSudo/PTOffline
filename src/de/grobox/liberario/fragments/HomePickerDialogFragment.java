@@ -38,7 +38,7 @@ import de.grobox.liberario.R;
 import de.grobox.liberario.data.RecentsDB;
 import de.grobox.liberario.ui.LocationView;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Location;
 
 public class HomePickerDialogFragment extends DialogFragment {
 

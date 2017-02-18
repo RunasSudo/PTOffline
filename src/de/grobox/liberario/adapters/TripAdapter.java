@@ -48,8 +48,8 @@ import de.grobox.liberario.ui.LegPopupMenu;
 import de.grobox.liberario.ui.SwipeDismissRecyclerViewTouchListener;
 import de.grobox.liberario.utils.DateUtils;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Stop;
-import de.schildbach.pte.dto.Trip;
+import de.grobox.liberario.pte.dto.Stop;
+import de.grobox.liberario.pte.dto.Trip;
 
 public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripHolder>{
 

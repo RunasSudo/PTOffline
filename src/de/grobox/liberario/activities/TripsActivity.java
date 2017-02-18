@@ -49,11 +49,11 @@ import de.grobox.liberario.data.RecentsDB;
 import de.grobox.liberario.tasks.AsyncQueryMoreTripsTask;
 import de.grobox.liberario.ui.SwipeDismissRecyclerViewTouchListener;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.QueryTripsResult;
-import de.schildbach.pte.dto.Trip;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.LocationType;
+import de.grobox.liberario.pte.dto.Product;
+import de.grobox.liberario.pte.dto.QueryTripsResult;
+import de.grobox.liberario.pte.dto.Trip;
 
 import static de.grobox.liberario.utils.TransportrUtils.getDragDistance;
 
@@ -88,14 +88,14 @@ public class TripsActivity extends TransportrActivity {
 		}
 
 		final Intent intent = getIntent();
-		start_context = (QueryTripsResult) intent.getSerializableExtra("de.schildbach.pte.dto.QueryTripsResult");
+		start_context = (QueryTripsResult) intent.getSerializableExtra("de.grobox.liberario.pte.dto.QueryTripsResult");
 		end_context = start_context;
 
 		// retrieve trip data from intent that is not stored properly in trip object
-		from = (Location) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.from");
-		via = (Location) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.via");
-		to = (Location) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.to");
-		products = (ArrayList<Product>) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.products");
+		from = (Location) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.from");
+		via = (Location) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.via");
+		to = (Location) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.to");
+		products = (ArrayList<Product>) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.products");
 
 		swipeRefresh = (SwipyRefreshLayout) findViewById(R.id.swipe_refresh_layout);
 		swipeRefresh.setColorSchemeResources(R.color.accent);
@@ -133,11 +133,11 @@ public class TripsActivity extends TransportrActivity {
 			     Trip trip = mAdapter.getItem(position).trip;
 
 			     Intent intent = new Intent(TripsActivity.this, TripDetailActivity.class);
-			     intent.putExtra("de.schildbach.pte.dto.Trip", trip);
-			     intent.putExtra("de.schildbach.pte.dto.Trip.from", from);
-				 intent.putExtra("de.schildbach.pte.dto.Trip.via", via);
-			     intent.putExtra("de.schildbach.pte.dto.Trip.to", to);
-				 intent.putExtra("de.schildbach.pte.dto.Trip.products", products);
+			     intent.putExtra("de.grobox.liberario.pte.dto.Trip", trip);
+			     intent.putExtra("de.grobox.liberario.pte.dto.Trip.from", from);
+				 intent.putExtra("de.grobox.liberario.pte.dto.Trip.via", via);
+			     intent.putExtra("de.grobox.liberario.pte.dto.Trip.to", to);
+				 intent.putExtra("de.grobox.liberario.pte.dto.Trip.products", products);
 
 				 int pos = mAdapter.getPosition(trip);
 				 ActivityOptionsCompat options = ActivityOptionsCompat.

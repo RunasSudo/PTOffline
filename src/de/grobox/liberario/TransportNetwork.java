@@ -20,8 +20,8 @@ package de.grobox.liberario;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.NetworkProvider;
+import de.grobox.liberario.pte.NetworkId;
+import de.grobox.liberario.pte.NetworkProvider;
 
 public class TransportNetwork {
 	private NetworkProvider network;

@@ -39,7 +39,7 @@ import java.util.List;
 import de.grobox.liberario.R;
 import de.grobox.liberario.WrapLocation;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Location;
 
 import static de.grobox.liberario.WrapLocation.WrapType.GPS;
 

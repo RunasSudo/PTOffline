@@ -34,10 +34,10 @@ import de.grobox.liberario.Preferences;
 import de.grobox.liberario.R;
 import de.grobox.liberario.activities.TripDetailActivity;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.QueryTripsResult;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Product;
+import de.grobox.liberario.pte.dto.QueryTripsResult;
 
 public class AsyncQueryTripsTask extends AsyncTask<Void, Void, QueryTripsResult> {
 

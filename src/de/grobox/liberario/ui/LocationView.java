@@ -55,9 +55,9 @@ import de.grobox.liberario.adapters.LocationAdapter;
 import de.grobox.liberario.data.RecentsDB;
 import de.grobox.liberario.fragments.HomePickerDialogFragment;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.SuggestLocationsResult;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.SuggestLocationsResult;
 
 import static de.grobox.liberario.WrapLocation.WrapType.HOME;
 import static de.grobox.liberario.WrapLocation.WrapType.MAP;

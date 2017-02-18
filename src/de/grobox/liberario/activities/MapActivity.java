@@ -73,15 +73,15 @@ import de.grobox.liberario.R;
 import de.grobox.liberario.TransportNetwork;
 import de.grobox.liberario.data.RecentsDB;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.Line;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.Point;
-import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.Stop;
-import de.schildbach.pte.dto.Trip;
-import de.schildbach.pte.dto.Trip.Leg;
-import de.schildbach.pte.dto.Trip.Public;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.Line;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Point;
+import de.grobox.liberario.pte.dto.Product;
+import de.grobox.liberario.pte.dto.Stop;
+import de.grobox.liberario.pte.dto.Trip;
+import de.grobox.liberario.pte.dto.Trip.Leg;
+import de.grobox.liberario.pte.dto.Trip.Public;
 
 public class MapActivity extends TransportrActivity implements MapEventsReceiver {
 	private MapView map;
@@ -97,9 +97,9 @@ public class MapActivity extends TransportrActivity implements MapEventsReceiver
 	public final static String SHOW_LOCATIONS = "de.grobox.liberario.MapActivity.SHOW_LOCATIONS";
 	public final static String SHOW_TRIP = "de.grobox.liberario.MapActivity.SHOW_TRIP";
 
-	public final static String LOCATION = "de.schildbach.pte.dto.Location";
-	public final static String LOCATIONS = "List<de.schildbach.pte.dto.Location>";
-	public final static String TRIP = "de.schildbach.pte.dto.Trip";
+	public final static String LOCATION = "de.grobox.liberario.pte.dto.Location";
+	public final static String LOCATIONS = "List<de.grobox.liberario.pte.dto.Location>";
+	public final static String TRIP = "de.grobox.liberario.pte.dto.Trip";
 
 	private enum MarkerType {BEGIN, CHANGE, STOP, END, WALK}
 	private enum LocationProvider {NONE, GPS, NETWORK, BOTH}

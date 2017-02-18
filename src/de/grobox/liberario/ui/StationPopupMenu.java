@@ -24,7 +24,7 @@ import android.view.View;
 
 import de.grobox.liberario.R;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Location;
 
 public class StationPopupMenu extends BasePopupMenu {
 

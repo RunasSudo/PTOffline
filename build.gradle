@@ -28,53 +28,14 @@ dependencies {
 	compile 'org.osmdroid:osmdroid-android:5.6.1'
 	compile 'uk.co.samuelwall:material-tap-target-prompt:1.6.3'
 
-	compile(project(':sublibs:public-transport-enabler:enabler')) {
-		exclude group: 'org.json' // provided by Android
-		exclude group: 'net.sf.kxml' // provided by Android
-	}
 	debugCompile 'org.slf4j:slf4j-api:1.7.21'
 	debugCompile 'com.github.tony19:logback-android-core:1.1.1-6'
 	debugCompile('com.github.tony19:logback-android-classic:1.1.1-6') {
 		exclude group: 'com.google.android', module: 'android'
 	}
-}
 
-dependencyVerification {
-	verify = [
-			'com.android.support:appcompat-v7:c485c421d73fa5b257fa4c39a31f7e24aeada62451f84b44250b8285b0dc95ae',
-			'com.android.support:design:4867cf256911d7ada88f3d948a27cdc7d4555d69411e2b4e3aa2336b657ad111',
-			'com.android.support:cardview-v7:7b4320d989c371fd9539c0aca7500c3f787b338021006e54ccfd8b8bea415c1a',
-			'com.android.support:recyclerview-v7:e3b519f59f05e9765fdc93b88286e4a7b9430f64b6440a03bacb5847daa8e13c',
-			'com.android.support:preference-v14:3a404b1e1e6a66d2e7d614c170da497aaaec55002fe5fb808635ac1c88812e63',
-			'com.github.orangegangsters:swipy:153d03ab51b7c3672e0dfb60963dc4b983c3bf0fd39adbff576cd5179b8edbda',
-			'de.cketti.library.changelog:ckchangelog:e113de0f4bc42b983dd6b690b67d76f29975167c2204e3792831961740889d78',
-			'org.apmem.tools:layouts:25f878e7faa5c384ed0861889104e5f10a40e5682eaf80c9abb47559c367b348',
-			'com.mikepenz:materialdrawer:91716d14c7537e8d490cc505b979430e03ac5cf7b4bdb72eb0afab23da02c22e',
-			'com.mikepenz:aboutlibraries:70a36d5f49efab987783fec44139f9810e46c4fac3e2d147e2602270a48d5017',
-			'com.mikepenz:fastadapter-commons:ff7c751a839c18575a4a4221c2cfc3fa9bb72846f4b346803a64d405b4393483',
-			'org.osmdroid:osmdroid-android:e64a97b8302a50bedf6c4c6ff024291008f72103b17a728801132ebdce0492ed',
-			'uk.co.samuelwall:material-tap-target-prompt:b53287592ddbe4a7c79aadea8092524c0760a1daa51c7cae928c445b0c192406',
-			'com.android.support:support-annotations:46cc01378ddbefa9d0a6bd46bb3c10b35b06e06e375d41a357c3769ba563e9c6',
-			'com.android.support:support-v4:b9b0b9220b7ece40cd621ee839d36d8094694151c7d7021ae91e3e7b76c1300f',
-			'com.android.support:support-vector-drawable:58c63db6367691397ce0d534fdef59fe204178af78deb686a0983f3b6556e6e0',
-			'com.android.support:animated-vector-drawable:d59d0161ff90fa04ace30425037c1d5463698f481dbf41a611e4dc622af09553',
-			'com.android.support:transition:d0b2db0594eff7555ec81c0fea9952d47a04c6174f50383bdf296b5dec8703d7',
-			'com.android.support:support-compat:c5072de567ae6ef711f7a90599e8370aefbece9f4df45407b5802a21714839d9',
-			'com.android.support:support-core-ui:df14d89b20e62b85cc55d5e17442c58d66e032c19833247fb44268f0ae3204b6',
-			'com.android.support:preference-v7:444c586ddfe186c61bf89a5d77e07a7237307a8b2b3b08bb7802713f144b1218',
-			'com.mikepenz:materialize:942ccf5e2aa1a46803aa884e8dc7bbaf2a9e8e9996a0cf92e3fe2f44a8592ba4',
-			'com.mikepenz:iconics-core:fdaec9164d5dccd213e1e80610b29dbd33a6e36ccd56ca3e8d4e4a802ac962d5',
-			'com.squareup.okhttp3:okhttp:eecd834b09d12c3cd568b811522b97012619f7f00378c3c719a1957fac6458ef',
-			'com.squareup.okhttp3:logging-interceptor:2f77bb4b1b2ecf1c330a54295b0b112f65a56d2c16b7937303ad601b1de18fde',
-			'com.google.guava:guava:36a666e3b71ae7f0f0dca23654b67e086e6c93d192f60ba5dfd5519db6c288c8',
-			'org.slf4j:slf4j-api:1d5aeb6bd98b0fdd151269eae941c05f6468a791ea0f1e68d8e7fe518af3e7df',
-			'com.google.code.findbugs:jsr305:bec0b24dcb23f9670172724826584802b80ae6cbdaba03bdebdef9327b962f6a',
-			'com.android.support:support-media-compat:84213df60369186320c6b4f3e1d25d1240045d4e5f72275474da0db0b1b62181',
-			'com.android.support:support-core-utils:b7f5449c6c60a813c7f8348cb2ae0d6221d453348af0a4623c2b6c917e64b87c',
-			'com.android.support:support-fragment:dfbe0891ff08b98ed70f4de41b7c597f4ac6d00d4c919534cce14a4007c79fc3',
-			'com.squareup.okio:okio:8c5436cadfab36bbd97db5f5c43b7bfdb5bf2f5f894ec8709b1929f14bdd010c',
-			'com.mikepenz:fastadapter:bee864e3dcb54b6c6126335f58b92ecb17a4b70b58a270279c91e9c96ac1b963',
-	]
+	compile 'com.google.guava:guava:20.0'
+	compile 'com.google.code.findbugs:jsr305:3.0.0'
 }
 
 allprojects {

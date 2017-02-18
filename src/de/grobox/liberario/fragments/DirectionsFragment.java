@@ -69,11 +69,11 @@ import de.grobox.liberario.ui.LocationGpsView;
 import de.grobox.liberario.ui.LocationView;
 import de.grobox.liberario.ui.TimeAndDateView;
 import de.grobox.liberario.WrapLocation;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.QueryTripsResult;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.LocationType;
+import de.grobox.liberario.pte.dto.Product;
+import de.grobox.liberario.pte.dto.QueryTripsResult;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.view.MotionEvent.ACTION_UP;
@@ -293,7 +293,7 @@ public class DirectionsFragment extends TransportrFragment implements TripHandle
 			Log.d(getClass().getSimpleName(), result.toString());
 
 			Intent intent = new Intent(getContext(), TripsActivity.class);
-			intent.putExtra("de.schildbach.pte.dto.QueryTripsResult", result);
+			intent.putExtra("de.grobox.liberario.pte.dto.QueryTripsResult", result);
 			fillIntent(intent);
 			startActivity(intent);
 		}
@@ -301,7 +301,7 @@ public class DirectionsFragment extends TransportrFragment implements TripHandle
 			Log.d(getClass().getSimpleName(), "QueryTripsResult is AMBIGUOUS");
 
 			Intent intent = new Intent(getContext(), AmbiguousLocationActivity.class);
-			intent.putExtra("de.schildbach.pte.dto.QueryTripsResult", result);
+			intent.putExtra("de.grobox.liberario.pte.dto.QueryTripsResult", result);
 			fillIntent(intent);
 			startActivity(intent);
 		}
@@ -668,12 +668,12 @@ public class DirectionsFragment extends TransportrFragment implements TripHandle
 	}
 
 	private void fillIntent(Intent intent) {
-		intent.putExtra("de.schildbach.pte.dto.Trip.from", ui.from.getLocation());
-		intent.putExtra("de.schildbach.pte.dto.Trip.via", ui.via.getLocation());
-		intent.putExtra("de.schildbach.pte.dto.Trip.to", ui.to.getLocation());
-		intent.putExtra("de.schildbach.pte.dto.Trip.date", ui.date.getDate());
-		intent.putExtra("de.schildbach.pte.dto.Trip.departure", (boolean) ui.type.getTag());
-		intent.putExtra("de.schildbach.pte.dto.Trip.products", new ArrayList<>(products));
+		intent.putExtra("de.grobox.liberario.pte.dto.Trip.from", ui.from.getLocation());
+		intent.putExtra("de.grobox.liberario.pte.dto.Trip.via", ui.via.getLocation());
+		intent.putExtra("de.grobox.liberario.pte.dto.Trip.to", ui.to.getLocation());
+		intent.putExtra("de.grobox.liberario.pte.dto.Trip.date", ui.date.getDate());
+		intent.putExtra("de.grobox.liberario.pte.dto.Trip.departure", (boolean) ui.type.getTag());
+		intent.putExtra("de.grobox.liberario.pte.dto.Trip.products", new ArrayList<>(products));
 	}
 
 	private static class DirectionsViewHolder {

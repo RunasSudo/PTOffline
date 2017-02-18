@@ -34,8 +34,8 @@ import java.util.List;
 import de.grobox.liberario.R;
 import de.grobox.liberario.utils.DateUtils;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Departure;
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Departure;
+import de.grobox.liberario.pte.dto.Location;
 
 public class DepartureAdapter extends RecyclerView.Adapter<DepartureAdapter.DepartureHolder>{
 

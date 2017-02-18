@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Location;
 
 public class FavLocation extends WrapLocation implements Serializable, Comparable<FavLocation> {
 	private static final long serialVersionUID = 3542146506031067902L;

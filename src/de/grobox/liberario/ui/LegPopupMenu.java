@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import de.grobox.liberario.utils.DateUtils;
 import de.grobox.liberario.utils.TransportrUtils;
 import de.grobox.liberario.R;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.Stop;
-import de.schildbach.pte.dto.Trip;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Stop;
+import de.grobox.liberario.pte.dto.Trip;
 
 public class LegPopupMenu extends BasePopupMenu {
 	private Location loc1 = null;

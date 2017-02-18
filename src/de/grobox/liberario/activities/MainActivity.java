@@ -72,7 +72,7 @@ import de.grobox.liberario.fragments.NearbyStationsFragment;
 import de.grobox.liberario.fragments.RecentTripsFragment;
 import de.grobox.liberario.fragments.SettingsFragment;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.NetworkProvider;
+import de.grobox.liberario.pte.NetworkProvider;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt;
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt.OnHidePromptListener;
 

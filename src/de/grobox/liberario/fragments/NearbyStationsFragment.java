@@ -47,9 +47,9 @@ import de.grobox.liberario.tasks.AsyncQueryNearbyStationsTask;
 import de.grobox.liberario.ui.LocationGpsView;
 import de.grobox.liberario.ui.LocationView;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-import de.schildbach.pte.dto.NearbyLocationsResult;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.LocationType;
+import de.grobox.liberario.pte.dto.NearbyLocationsResult;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;

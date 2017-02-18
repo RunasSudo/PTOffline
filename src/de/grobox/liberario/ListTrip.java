@@ -20,7 +20,7 @@ package de.grobox.liberario;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.schildbach.pte.dto.Trip;
+import de.grobox.liberario.pte.dto.Trip;
 
 // this hack seems to be necessary because RecyclerView has no way to save view states for its items
 public class ListTrip {

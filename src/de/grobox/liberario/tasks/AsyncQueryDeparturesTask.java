@@ -23,8 +23,8 @@ import de.grobox.liberario.NetworkProviderFactory;
 import de.grobox.liberario.Preferences;
 import de.grobox.liberario.R;
 import de.grobox.liberario.fragments.DeparturesFragment;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.QueryDeparturesResult;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.QueryDeparturesResult;
 
 import android.os.AsyncTask;
 import android.util.Log;

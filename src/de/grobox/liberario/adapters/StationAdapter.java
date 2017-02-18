@@ -31,8 +31,8 @@ import java.util.List;
 import de.grobox.liberario.R;
 import de.grobox.liberario.ui.StationPopupMenu;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.Product;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Product;
 
 public class StationAdapter extends RecyclerView.Adapter<StationAdapter.StationHolder>{
 

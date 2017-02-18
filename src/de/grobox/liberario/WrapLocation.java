@@ -22,11 +22,11 @@ import android.support.annotation.Nullable;
 import java.io.Serializable;
 
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Location;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static de.grobox.liberario.WrapLocation.WrapType.NORMAL;
-import static de.schildbach.pte.dto.LocationType.ANY;
+import static de.grobox.liberario.pte.dto.LocationType.ANY;
 
 public class WrapLocation implements Serializable{
 

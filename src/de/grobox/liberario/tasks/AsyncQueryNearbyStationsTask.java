@@ -27,10 +27,10 @@ import de.grobox.liberario.NetworkProviderFactory;
 import de.grobox.liberario.Preferences;
 import de.grobox.liberario.R;
 import de.grobox.liberario.fragments.NearbyStationsFragment;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-import de.schildbach.pte.dto.NearbyLocationsResult;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.LocationType;
+import de.grobox.liberario.pte.dto.NearbyLocationsResult;
 
 public class AsyncQueryNearbyStationsTask extends AsyncTask<Void, Void, NearbyLocationsResult> {
 	private NearbyStationsFragment fragment;

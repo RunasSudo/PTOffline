@@ -43,7 +43,7 @@ import java.util.Set;
 import de.grobox.liberario.Preferences;
 import de.grobox.liberario.R;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Product;
+import de.grobox.liberario.pte.dto.Product;
 
 public class ProductDialogFragment extends DialogFragment {
 

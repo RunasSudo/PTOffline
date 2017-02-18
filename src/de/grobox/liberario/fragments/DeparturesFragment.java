@@ -46,10 +46,10 @@ import de.grobox.liberario.tasks.AsyncQueryDeparturesTask;
 import de.grobox.liberario.ui.LocationView;
 import de.grobox.liberario.ui.TimeAndDateView;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Departure;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.QueryDeparturesResult;
-import de.schildbach.pte.dto.StationDepartures;
+import de.grobox.liberario.pte.dto.Departure;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.QueryDeparturesResult;
+import de.grobox.liberario.pte.dto.StationDepartures;
 
 import static de.grobox.liberario.utils.TransportrUtils.getDragDistance;
 

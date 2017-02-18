@@ -37,7 +37,7 @@ import de.grobox.liberario.activities.MainActivity;
 import de.grobox.liberario.activities.PickNetworkProviderActivity;
 import de.grobox.liberario.data.RecentsDB;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Location;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener, HomePickerDialogFragment.OnHomeChangedListener {
 

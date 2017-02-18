@@ -27,8 +27,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.schildbach.pte.NetworkId;
-import de.schildbach.pte.dto.Product;
+import de.grobox.liberario.pte.NetworkId;
+import de.grobox.liberario.pte.dto.Product;
 
 public class Preferences {
 

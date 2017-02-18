@@ -42,10 +42,10 @@ import de.grobox.liberario.adapters.TripAdapter;
 import de.grobox.liberario.tasks.AsyncQueryTripsTask;
 import de.grobox.liberario.utils.DateUtils;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.Product;
-import de.schildbach.pte.dto.QueryTripsResult;
-import de.schildbach.pte.dto.Trip;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.Product;
+import de.grobox.liberario.pte.dto.QueryTripsResult;
+import de.grobox.liberario.pte.dto.Trip;
 
 public class TripDetailActivity extends TransportrActivity implements AsyncQueryTripsTask.TripHandler {
 
@@ -77,13 +77,13 @@ public class TripDetailActivity extends TransportrActivity implements AsyncQuery
 		}
 
 		final Intent intent = getIntent();
-		trip = (Trip) intent.getSerializableExtra("de.schildbach.pte.dto.Trip");
+		trip = (Trip) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip");
 		ui = new TripAdapter.BaseTripHolder(findViewById(R.id.cardView), trip.legs.size());
 
 		// retrieve trip data from intent that is not stored properly in trip object
-		from = (Location) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.from");
-		to = (Location) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.to");
-		products = (ArrayList<Product>) intent.getSerializableExtra("de.schildbach.pte.dto.Trip.products");
+		from = (Location) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.from");
+		to = (Location) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.to");
+		products = (ArrayList<Product>) intent.getSerializableExtra("de.grobox.liberario.pte.dto.Trip.products");
 
 		setHeader();
 		setTrip(trip);

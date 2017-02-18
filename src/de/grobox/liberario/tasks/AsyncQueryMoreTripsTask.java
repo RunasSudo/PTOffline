@@ -23,9 +23,9 @@ import de.grobox.liberario.NetworkProviderFactory;
 import de.grobox.liberario.Preferences;
 import de.grobox.liberario.R;
 import de.grobox.liberario.activities.TripsActivity;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.dto.QueryTripsContext;
-import de.schildbach.pte.dto.QueryTripsResult;
+import de.grobox.liberario.pte.NetworkProvider;
+import de.grobox.liberario.pte.dto.QueryTripsContext;
+import de.grobox.liberario.pte.dto.QueryTripsResult;
 
 import android.os.AsyncTask;
 import android.widget.Toast;

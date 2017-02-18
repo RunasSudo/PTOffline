@@ -31,10 +31,9 @@ import android.widget.TextView;
 
 import de.grobox.liberario.R;
 import de.grobox.liberario.utils.TransportrUtils;
-import de.schildbach.pte.dto.Line;
+import de.grobox.liberario.pte.dto.Line;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class LineView extends LinearLayout {
 

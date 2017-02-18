@@ -32,11 +32,10 @@ import java.util.Collections;
 import java.util.List;
 
 import de.grobox.liberario.FavLocation;
-import de.grobox.liberario.Preferences;
 import de.grobox.liberario.RecentTrip;
 import de.grobox.liberario.WrapLocation;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
+import de.grobox.liberario.pte.dto.Location;
+import de.grobox.liberario.pte.dto.LocationType;
 
 import static de.grobox.liberario.Preferences.getNetwork;
 

@@ -22,7 +22,7 @@ import java.util.List;
 
 import de.grobox.liberario.TransportNetwork;
 import de.grobox.liberario.R;
-import de.schildbach.pte.NetworkId;
+import de.grobox.liberario.pte.NetworkId;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
