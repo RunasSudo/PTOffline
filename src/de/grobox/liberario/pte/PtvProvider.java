@@ -17,20 +17,19 @@
 
 package de.grobox.liberario.pte;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -77,11 +76,8 @@ public class PtvProvider extends AbstractNetworkProvider
 
 	String unquote(String str) {
 		// Regex replace is *very* expensive
-		if (str.startsWith("\"")) {
-			str = str.substring(1);
-		}
-		if (str.endsWith("\"")) {
-			str = str.substring(0, str.length() - 1);
+		if (str.startsWith("\"") && str.endsWith("\"")) {
+			str = str.substring(1, str.length() - 1);
 		}
 		return str;
 	}
@@ -111,6 +107,7 @@ public class PtvProvider extends AbstractNetworkProvider
 
 		File cacheDir = TransportrApplication.getAppContext().getCacheDir();
 
+		// Apache ZipFile requires unsupported NIO File.toPath
 		ZipFile zipFile = new ZipFile("/sdcard/gtfs.zip");
 		Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
 		//while (locations.size() < maxLocations && zipEntries.hasMoreElements()) {
@@ -120,20 +117,12 @@ public class PtvProvider extends AbstractNetworkProvider
 				// Process this GTFS zip
 				System.out.println(zipEntry.getName());
 
-				File gtfsFile = File.createTempFile("gtfs", "zip", cacheDir);
-				InputStream is = zipFile.getInputStream(zipEntry);
-				OutputStream os = new FileOutputStream(gtfsFile);
-				byte[] buf = new byte[4096];
-				int len;
-				while((len = is.read(buf)) > 0) {
-					os.write(buf, 0, len);
-				}
-				os.close();
-				is.close();
-
-				ZipFile gtfsZip = new ZipFile(gtfsFile);
-				ZipEntry stopsEntry = gtfsZip.getEntry("stops.txt");
-				BufferedReader stopsReader = new BufferedReader(new InputStreamReader(gtfsZip.getInputStream(stopsEntry)));
+				ZipArchiveInputStream gtfsStream = new ZipArchiveInputStream(zipFile.getInputStream(zipEntry));
+				ZipArchiveEntry stopsEntry;
+				do {
+					stopsEntry = gtfsStream.getNextZipEntry();
+				} while (!stopsEntry.getName().equals("stops.txt"));
+				BufferedReader stopsReader = new BufferedReader(new InputStreamReader(gtfsStream));
 
 				String line = stopsReader.readLine();
 				// Handle BOM
@@ -152,7 +141,7 @@ public class PtvProvider extends AbstractNetworkProvider
 					while((line = stopsReader.readLine()) != null) {
 						//System.out.println(line);
 						String[] bits = line.split(",");
-						double lat = Double.parseDouble(unquote(bits[col_stop_lat])); // TODO: Handle quotes gracefully
+						double lat = Double.parseDouble(unquote(bits[col_stop_lat]));
 						double lon = Double.parseDouble(unquote(bits[col_stop_lon]));
 						Point point = Point.fromDouble(lat, lon);
 						Location stopLocation = Location.coord(point);
@@ -176,9 +165,6 @@ public class PtvProvider extends AbstractNetworkProvider
 					ex.printStackTrace();
 				}
 				stopsReader.close();
-				gtfsFile.delete();
-
-				//break;
 			}
 		}
 
