@@ -19,6 +19,8 @@
 package io.github.runassudo.gtfs;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by runassudo on 19/02/17.
@@ -29,5 +31,18 @@ public abstract class GTFSFile {
 
 	public interface IterateThroughContentsCallback {
 		void call(GTFSCSV gtfsCsv) throws IOException;
+	}
+
+	public void iterateThroughContents(String[] files, GTFSFile.IterateThroughContentsCallback... callbacks) throws IOException {
+		List<String> filesList = Arrays.asList(files);
+		iterateThroughContents(gtfsCsv -> {
+			if (filesList.contains(gtfsCsv.getName())) {
+				callbacks[filesList.indexOf(gtfsCsv.getName())].call(gtfsCsv);
+			}
+		});
+	}
+
+	public void iterateThroughContents(String file, GTFSFile.IterateThroughContentsCallback callback) throws IOException {
+		iterateThroughContents(new String[] {file}, callback);
 	}
 }

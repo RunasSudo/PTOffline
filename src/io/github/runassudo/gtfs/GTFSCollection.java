@@ -59,16 +59,15 @@ public class GTFSCollection {
 	}
 
 	public void iterateThroughContents(String[] files, GTFSFile.IterateThroughContentsCallback... callbacks) throws IOException {
-		List<String> filesList = Arrays.asList(files);
-		iterateThroughContents(gtfsCsv -> {
-			if (filesList.contains(gtfsCsv.getName())) {
-				callbacks[filesList.indexOf(gtfsCsv.getName())].call(gtfsCsv);
-			}
+		iterateThroughMembers(gtfsFile -> {
+			gtfsFile.iterateThroughContents(files, callbacks);
 		});
 	}
 
 	public void iterateThroughContents(String file, GTFSFile.IterateThroughContentsCallback callback) throws IOException {
-		iterateThroughContents(new String[] {file}, callback);
+		iterateThroughMembers(gtfsFile -> {
+			gtfsFile.iterateThroughContents(file, callback);
+		});
 	}
 
 	public interface IterateThroughMembersCallback {
