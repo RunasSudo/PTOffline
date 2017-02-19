@@ -35,3 +35,6 @@ gradlew.bat
 
 # files from other editors, desktop environments, ...
 .directory
+
+# test things
+/gtfs*
