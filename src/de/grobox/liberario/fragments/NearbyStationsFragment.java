@@ -107,9 +107,8 @@ public class NearbyStationsFragment extends TransportrFragment {
 			}
 
 			@Override
-			public void deactivateGPS() {
-				ui.stations_area.setVisibility(GONE);
-			}
+			//public void deactivateGPS() { ui.stations_area.setVisibility(GONE); }
+			public void deactivateGPS() { }
 
 			@Override
 			public void onLocationChanged(Location location) {
