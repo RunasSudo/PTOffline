@@ -18,28 +18,26 @@
 
 package io.github.runassudo.ptoffline.pte;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import javax.annotation.Nullable;
 
+import io.github.runassudo.gtfs.GTFSCollection;
+import io.github.runassudo.ptoffline.R;
 import io.github.runassudo.ptoffline.TransportrApplication;
+import io.github.runassudo.ptoffline.activities.MainActivity;
 import io.github.runassudo.ptoffline.pte.dto.Location;
 import io.github.runassudo.ptoffline.pte.dto.LocationType;
 import io.github.runassudo.ptoffline.pte.dto.NearbyLocationsResult;
@@ -53,7 +51,6 @@ import io.github.runassudo.ptoffline.pte.dto.Style;
 import io.github.runassudo.ptoffline.pte.dto.SuggestLocationsResult;
 import io.github.runassudo.ptoffline.pte.dto.SuggestedLocation;
 import io.github.runassudo.ptoffline.utils.TransportrUtils;
-import io.github.runassudo.gtfs.GTFSCollection;
 
 /**
  * @author RunasSudo
@@ -70,6 +67,7 @@ public class PtvProvider extends AbstractNetworkProvider
 	protected boolean hasCapability(Capability capability) {
 		switch (capability) {
 			case NEARBY_LOCATIONS:
+			case SUGGEST_LOCATIONS:
 				return true;
 			default:
 				return false;
@@ -96,15 +94,16 @@ public class PtvProvider extends AbstractNetworkProvider
 		}
 
 		// TreeSet is sorted, so we can keep only the "maxLocations" closest in memory
-		TreeSet<WorkingNearbyLocation> locations = new TreeSet<WorkingNearbyLocation>(new Comparator<WorkingNearbyLocation>() {
-			public int compare(WorkingNearbyLocation l1, WorkingNearbyLocation l2) {
-				return (int) (l1.distance - l2.distance);
-			}
-		});
+		TreeSet<WorkingNearbyLocation> locations = new TreeSet<>((l1, l2) -> (int) (l1.distance - l2.distance));
 
 		GTFSCollection gtfsCollection = new GTFSCollection(new File("/sdcard/gtfs.zip"));
 		gtfsCollection.iterateThroughContents("stops.txt", gtfsCsv -> {
+			final boolean[] done = new boolean[] { false }; // DODGY!
 			gtfsCsv.iterateThroughEntries(gtfsEntry -> {
+				if (done[0]) {
+					return;
+				}
+
 				double lat = Double.parseDouble(gtfsEntry.getField("stop_lat"));
 				double lon = Double.parseDouble(gtfsEntry.getField("stop_lon"));
 				Point point = Point.fromDouble(lat, lon);
@@ -114,20 +113,26 @@ public class PtvProvider extends AbstractNetworkProvider
 					String id = gtfsEntry.getField("stop_id");
 					String name = gtfsEntry.getField("stop_name");
 					Location stop = new Location(LocationType.STATION, id, point, null, name);
-					if (locations.size() < maxLocations) {
+					if(locations.size() < maxLocations) {
 						locations.add(new WorkingNearbyLocation(stop, distance));
+						if (maxLocations == 1 && location.type != LocationType.COORD && name.equals(location.name)) {
+							done[0] = true;
+						}
 					} else {
 						WorkingNearbyLocation currentMax = locations.last();
-						if (distance < currentMax.distance) {
+						if(distance < currentMax.distance) {
 							locations.pollLast();
 							locations.add(new WorkingNearbyLocation(stop, distance));
+							if (maxLocations == 1 && location.type != LocationType.COORD && name.equals(location.name)) {
+								done[0] = true;
+							}
 						}
 					}
 				}
 			});
 		});
 
-		ArrayList<Location> locationsList = new ArrayList<Location>();
+		ArrayList<Location> locationsList = new ArrayList<>();
 		for (WorkingNearbyLocation workingLocation : locations) {
 			locationsList.add(workingLocation.location);
 		}
@@ -143,8 +148,24 @@ public class PtvProvider extends AbstractNetworkProvider
 	}
 
 	public SuggestLocationsResult suggestLocations(CharSequence constraint) throws IOException {
+		ArrayList<SuggestedLocation> locations = new ArrayList<>();
+
+		GTFSCollection gtfsCollection = new GTFSCollection(new File("/sdcard/gtfs.zip"));
+		gtfsCollection.iterateThroughContents("stops.txt", gtfsCsv -> {
+			gtfsCsv.iterateThroughEntries(gtfsEntry -> {
+				String name = gtfsEntry.getField("stop_name");
+				if(name.toLowerCase().contains(constraint.toString().toLowerCase())) {
+					String id = gtfsEntry.getField("stop_id");
+					double lat = Double.parseDouble(gtfsEntry.getField("stop_lat"));
+					double lon = Double.parseDouble(gtfsEntry.getField("stop_lon"));
+					Point point = Point.fromDouble(lat, lon);
+					locations.add(new SuggestedLocation(new Location(LocationType.STATION, id, point, null, name)));
+				}
+			});
+		});
+
 		final ResultHeader resultHeader = new ResultHeader(network, "PTOffline");
-		return new SuggestLocationsResult(resultHeader, new ArrayList<SuggestedLocation>());
+		return new SuggestLocationsResult(resultHeader, locations);
 	}
 
 	public Set<Product> defaultProducts() {

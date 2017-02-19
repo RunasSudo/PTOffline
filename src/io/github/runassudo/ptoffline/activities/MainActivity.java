@@ -17,6 +17,7 @@
 
 package io.github.runassudo.ptoffline.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -88,6 +89,7 @@ public class MainActivity extends TransportrActivity implements FragmentManager.
 	static final public int PR_ACCESS_FINE_LOCATION_DIRECTIONS = 1;
 	static final public int PR_ACCESS_FINE_LOCATION_MAPS = 2;
 	static final public int PR_WRITE_EXTERNAL_STORAGE = 3;
+	static final public int PR_READ_EXTERNAL_STORAGE = 4;
 
 	private final static String ONBOARDING_DRAWER = "onboardingDrawer";
 
@@ -219,6 +221,17 @@ public class MainActivity extends TransportrActivity implements FragmentManager.
 
 		// create Android 7.1 shortcut
 		registerNougatShortcuts();
+
+		// Ensure we have read permission
+		if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+			// Should we show an explanation?
+			if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+				Toast.makeText(this, R.string.permission_denied_read, Toast.LENGTH_LONG).show();
+			} else {
+				Toast.makeText(this, R.string.permission_explanation_read, Toast.LENGTH_LONG).show();
+				ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.READ_EXTERNAL_STORAGE }, MainActivity.PR_READ_EXTERNAL_STORAGE);
+			}
+		}
 	}
 
 	@TargetApi(Build.VERSION_CODES.N_MR1)
@@ -289,6 +302,10 @@ public class MainActivity extends TransportrActivity implements FragmentManager.
 				case PR_ACCESS_FINE_LOCATION_DIRECTIONS: {
 					DirectionsFragment f = (DirectionsFragment) getFragment(DirectionsFragment.TAG);
 					if(f != null) f.activateGPS();
+					break;
+				}
+				case PR_READ_EXTERNAL_STORAGE: {
+					// Nothing to worry about
 					break;
 				}
 				default:
