@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical">
 
-        <de.grobox.liberario.ui.LineView
+        <io.github.runassudo.ptoffline.ui.LineView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

@@ -1,6 +1,6 @@
 /*
     PTOffline: An offline GTFS/public transport app for Android
-    Copyright © 2017  RunasSudo
+    Copyright © 2017  RunasSudo (Yingtong Li)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by

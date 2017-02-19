@@ -52,7 +52,7 @@
             android:layout_toRightOf="@+id/depTimeView"
             android:orientation="horizontal">
 
-            <de.grobox.liberario.ui.LineView
+            <io.github.runassudo.ptoffline.ui.LineView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>

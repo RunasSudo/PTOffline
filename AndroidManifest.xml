@@ -2,7 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="de.grobox.liberario"
+          package="io.github.runassudo.ptoffline"
           android:installLocation="auto">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -29,7 +29,7 @@
         android:resizeable="true" />
 
     <application
-        android:name="de.grobox.liberario.TransportrApplication"
+        android:name="io.github.runassudo.ptoffline.TransportrApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"

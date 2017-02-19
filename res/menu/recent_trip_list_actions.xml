@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:de.grobox.liberario="http://schemas.android.com/apk/res-auto" >
+      xmlns:io.github.runassudo.ptoffline="http://schemas.android.com/apk/res-auto" >
 
     <item
         android:id="@+id/action_recent_trips_sort"
         android:icon="@drawable/ic_action_content_sort"
-        de.grobox.liberario:showAsAction="always"
+        io.github.runassudo.ptoffline:showAsAction="always"
         android:title="@string/action_fav_trips_sort">
 
         <menu>

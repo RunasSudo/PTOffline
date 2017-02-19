@@ -19,7 +19,7 @@
         android:orientation="vertical"
         android:padding="5dp">
 
-        <de.grobox.liberario.ui.LocationView
+        <io.github.runassudo.ptoffline.ui.LocationView
             android:id="@+id/stationView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <de.grobox.liberario.ui.TimeAndDateView
+            <io.github.runassudo.ptoffline.ui.TimeAndDateView
                 android:id="@+id/dateView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

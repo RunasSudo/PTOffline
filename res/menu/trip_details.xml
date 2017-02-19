@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:de.grobox.liberario="http://schemas.android.com/apk/res-auto" >
+      xmlns:io.github.runassudo.ptoffline="http://schemas.android.com/apk/res-auto" >
 
     <item
         android:id="@+id/action_reload"
         android:icon="@drawable/ic_action_navigation_refresh"
-        de.grobox.liberario:showAsAction="ifRoom"
+        io.github.runassudo.ptoffline:showAsAction="ifRoom"
         android:title="@string/action_refresh"/>
 
     <item
         android:id="@+id/action_show_on_map"
         android:icon="@drawable/ic_action_location_map"
-        de.grobox.liberario:showAsAction="ifRoom"
+        io.github.runassudo.ptoffline:showAsAction="ifRoom"
         android:title="@string/action_show_on_map"/>
 
     <item
         android:id="@+id/action_share"
         android:icon="@drawable/ic_action_social_share"
-        de.grobox.liberario:showAsAction="ifRoom"
+        io.github.runassudo.ptoffline:showAsAction="ifRoom"
         android:title="@string/action_share"/>
 
     <item
         android:id="@+id/action_calendar"
         android:icon="@drawable/ic_action_calendar"
-        de.grobox.liberario:showAsAction="ifRoom"
+        io.github.runassudo.ptoffline:showAsAction="ifRoom"
         android:title="@string/action_trip_calendar"/>
 
 </menu>

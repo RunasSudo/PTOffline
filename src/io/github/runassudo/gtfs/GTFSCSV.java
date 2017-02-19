@@ -1,6 +1,6 @@
 /*
     PTOffline: An offline GTFS/public transport app for Android
-    Copyright © 2017  RunasSudo
+    Copyright © 2017  RunasSudo (Yingtong Li)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -24,11 +24,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import de.grobox.liberario.pte.PtvProvider;
-import de.grobox.liberario.pte.dto.Location;
-import de.grobox.liberario.pte.dto.LocationType;
-import de.grobox.liberario.pte.dto.Point;
-import de.grobox.liberario.utils.TransportrUtils;
+import io.github.runassudo.ptoffline.pte.PtvProvider;
+import io.github.runassudo.ptoffline.pte.dto.Location;
+import io.github.runassudo.ptoffline.pte.dto.LocationType;
+import io.github.runassudo.ptoffline.pte.dto.Point;
+import io.github.runassudo.ptoffline.utils.TransportrUtils;
 
 /**
  * Created by runassudo on 19/02/17.
