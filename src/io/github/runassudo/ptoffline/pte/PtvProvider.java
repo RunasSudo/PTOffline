@@ -27,7 +27,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -153,40 +155,78 @@ public class PtvProvider extends AbstractNetworkProvider
 		ArrayList<String> datesAdded = new ArrayList<>();
 		ArrayList<String> datesRemoved = new ArrayList<>();
 
+		Calendar nextDate;
+
 		public ServiceCalendarData(boolean[] weekdays, Date startDate, Date endDate) {
 			this.weekdays = weekdays;
 			this.startDate = Calendar.getInstance();
 			this.startDate.setTime(startDate);
 			this.endDate = Calendar.getInstance();
 			this.endDate.setTime(endDate);
+			this.endDate.add(Calendar.DAY_OF_MONTH, 1); // Since we use .before with this date, but want <= behaviour
 		}
 
-		public Date nextDate(Date after, Date timeOfDay) {
-			Calendar timeOfDayCal = Calendar.getInstance();
-			timeOfDayCal.setTime(timeOfDay);
+		boolean isDateOkay(Calendar date) {
+			String dateString = dateFormat.format(date.getTime());
+			if (datesAdded.contains(dateString)) {
+				return true;
+			}
+			int weekday = (date.get(Calendar.DAY_OF_WEEK) - 2) % 7; // sunday = 1, saturday = 7 in Java
+			weekday = (weekday + 7) % 7; // Ensure positive
+			if (weekdays[weekday] && date.after(startDate) && !datesRemoved.contains(dateString)) {
+				return true;
+			}
+			return false;
+		}
 
+		public void precomputeNextDate(Date after) {
 			Calendar date = Calendar.getInstance();
 			date.setTime(after);
 			if (date.before(startDate)) {
 				date = startDate;
 			}
+			// Account for >= startDate
+			date.set(Calendar.HOUR_OF_DAY, 23);
+			date.set(Calendar.MINUTE, 59);
+			date.set(Calendar.SECOND, 59);
+			date.set(Calendar.MILLISECOND, 0);
+
+			while (date.before(endDate)) {
+				if (isDateOkay(date)) {
+					nextDate = date;
+					return;
+				}
+				date.add(Calendar.DAY_OF_MONTH, 1);
+			}
+		}
+
+		public Date nextDate(Date after, Date timeOfDay) {
+			if (nextDate == null) {
+				return null;
+			}
+
+			Calendar timeOfDayCal = Calendar.getInstance();
+			timeOfDayCal.setTime(timeOfDay);
+			Calendar afterCal = Calendar.getInstance();
+			afterCal.setTime(after);
+
+			Calendar date = (Calendar) nextDate.clone();
 			date.set(Calendar.HOUR_OF_DAY, timeOfDayCal.get(Calendar.HOUR_OF_DAY));
 			date.set(Calendar.MINUTE, timeOfDayCal.get(Calendar.MINUTE));
 			date.set(Calendar.SECOND, timeOfDayCal.get(Calendar.SECOND));
 			date.set(Calendar.MILLISECOND, 0);
 
-			while (date.before(endDate)) {
-				String dateString = dateFormat.format(date.getTime());
-				if (datesAdded.contains(dateString)) {
-					return date.getTime();
+			if (date.after(afterCal)) {
+				return date.getTime();
+			} else {
+				while(date.before(endDate)) {
+					date.add(Calendar.DAY_OF_MONTH, 1);
+					if(isDateOkay(date)) {
+						return date.getTime();
+					}
 				}
-				int weekday = (date.get(Calendar.DAY_OF_WEEK) - 2) % 7; // sunday = 1, saturday = 7 in Java
-				if (weekdays[weekday] && date.after(startDate) && !datesRemoved.contains(dateString)) {
-					return date.getTime();
-				}
+				return null;
 			}
-
-			return null;
 		}
 	}
 
@@ -199,8 +239,9 @@ public class PtvProvider extends AbstractNetworkProvider
 		String service_id;
 		ServiceCalendarData serviceCalendarData;
 
-		String route_id;
+		//String route_id;
 		Line line;
+		String trip_headsign;
 
 		WorkingTripDepartureRoute(String trip_id, String departure_time, GTFSFile gtfsFile) {
 			this.trip_id = trip_id;
@@ -250,6 +291,56 @@ public class PtvProvider extends AbstractNetworkProvider
 		Location station = station_[0];
 		System.out.println("Got stop " + station.id);
 
+		HashMap<GTFSFile, HashMap<String, ServiceCalendarData>> calendarDataMap = new HashMap<>();
+
+		// Get service calendar data
+		System.out.println("Getting calendar data");
+		for (GTFSFile gtfsFile : gtfsFiles) {
+			HashMap<String, ServiceCalendarData> thisFileCalendarDataMap = new HashMap<>();
+			gtfsFile.iterateThroughContents("calendar.txt", gtfsCsv -> {
+				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
+					String service_id = gtfsEntry.getField("service_id");
+					boolean[] weekdays = new boolean[] {
+							gtfsEntry.getField("monday").equals("1"),
+							gtfsEntry.getField("tuesday").equals("1"),
+							gtfsEntry.getField("wednesday").equals("1"),
+							gtfsEntry.getField("thursday").equals("1"),
+							gtfsEntry.getField("friday").equals("1"),
+							gtfsEntry.getField("saturday").equals("1"),
+							gtfsEntry.getField("sunday").equals("1"),
+					};
+					try {
+						thisFileCalendarDataMap.put(service_id, new ServiceCalendarData(weekdays, dateFormat.parse(gtfsEntry.getField("start_date")), dateFormat.parse(gtfsEntry.getField("end_date"))));
+					} catch(ParseException ex) {
+						ex.printStackTrace();
+						throw new IOException("Error parsing date format");
+					}
+				});
+			});
+			calendarDataMap.put(gtfsFile, thisFileCalendarDataMap);
+		}
+		System.out.println("Getting calendar exceptions");
+		for (GTFSFile gtfsFile : gtfsFiles) {
+			HashMap<String, ServiceCalendarData> thisFileCalendarDataMap = calendarDataMap.get(gtfsFile);
+			gtfsFile.iterateThroughContents("calendar_dates.txt", gtfsCsv -> {
+				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
+					String service_id = gtfsEntry.getField("service_id");
+					String exception_type = gtfsEntry.getField("exception_type");
+					if(exception_type.equals("1")) {
+						thisFileCalendarDataMap.get(service_id).datesAdded.add(gtfsEntry.getField("date"));
+					} else if(exception_type.equals("2")) {
+						thisFileCalendarDataMap.get(service_id).datesRemoved.add(gtfsEntry.getField("date"));
+					} else {
+						throw new IOException("Unknown exception_type " + exception_type);
+					}
+				});
+			});
+			for (Map.Entry<String, ServiceCalendarData> entry : thisFileCalendarDataMap.entrySet()) {
+				System.out.println("Precomputing time for " + entry.getKey());
+				entry.getValue().precomputeNextDate(time);
+			}
+		}
+
 		StationDepartures stationDepartures = new StationDepartures(station, new ArrayList<>(), null);
 
 		// Identify trips with this stop
@@ -274,23 +365,29 @@ public class PtvProvider extends AbstractNetworkProvider
 		// Get correspoding routes
 		System.out.println("Getting routes");
 		HashSet<String> routeIds = new HashSet<>();
-		HashSet<String> serviceIds = new HashSet<>();
 		for (GTFSFile gtfsFile : gtfsFiles) {
+			HashMap<String, ServiceCalendarData> thisFileCalendarDataMap = calendarDataMap.get(gtfsFile);
 			gtfsFile.iterateThroughContents("trips.txt", gtfsCsv -> {
 				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
-					String trip_id = gtfsEntry.getField("trip_id");
-					if (tripIds.contains(trip_id)) {
-						for(WorkingTripDepartureRoute workingTripDepartureRoute : trips) {
-							if(workingTripDepartureRoute.gtfsFile != gtfsFile) {
-								continue;
-							}
-							if(trip_id.equals(workingTripDepartureRoute.trip_id)) {
-								String route_id = gtfsEntry.getField("route_id");
-								String service_id = gtfsEntry.getField("service_id");
-								workingTripDepartureRoute.route_id = route_id;
-								workingTripDepartureRoute.service_id = service_id;
-								routeIds.add(route_id);
-								serviceIds.add(service_id);
+					// Most of these are bogus anyway
+					String service_id = gtfsEntry.getField("service_id");
+					if (thisFileCalendarDataMap.containsKey(service_id) && thisFileCalendarDataMap.get(service_id).nextDate != null) {
+						// Looking promising
+						String trip_id = gtfsEntry.getField("trip_id");
+						if(tripIds.contains(trip_id)) {
+							for(WorkingTripDepartureRoute workingTripDepartureRoute : trips) {
+								if(workingTripDepartureRoute.gtfsFile != gtfsFile) {
+									continue;
+								}
+								if(trip_id.equals(workingTripDepartureRoute.trip_id)) {
+									String route_id = gtfsEntry.getField("route_id");
+									//workingTripDepartureRoute.route_id = route_id;
+									workingTripDepartureRoute.service_id = service_id;
+									routeIds.add(route_id);
+									workingTripDepartureRoute.serviceCalendarData = thisFileCalendarDataMap.get(service_id);
+									workingTripDepartureRoute.trip_headsign = gtfsEntry.getField("trip_headsign");
+									workingTripDepartureRoute.line = new Line(route_id, null, null, workingTripDepartureRoute.trip_headsign);
+								}
 							}
 						}
 					}
@@ -298,6 +395,7 @@ public class PtvProvider extends AbstractNetworkProvider
 			});
 		}
 
+		/*
 		// Get details for route
 		System.out.println("Getting route details");
 		for (GTFSFile gtfsFile : gtfsFiles) {
@@ -310,7 +408,8 @@ public class PtvProvider extends AbstractNetworkProvider
 								continue;
 							}
 							if(route_id.equals(workingTripDepartureRoute.route_id)) {
-								Line line = new Line(route_id, null, null, gtfsEntry.getField("route_short_name"), gtfsEntry.getField("route_long_name"), null);
+								workingTripDepartureRoute.route_long_name = gtfsEntry.getField("route_long_name");
+								Line line = new Line(route_id, null, null, gtfsEntry.getField("route_short_name"));
 								workingTripDepartureRoute.line = line;
 							}
 						}
@@ -318,79 +417,29 @@ public class PtvProvider extends AbstractNetworkProvider
 				});
 			});
 		}
-
-		// Get service calendar data
-		System.out.println("Getting calendar data");
-		for (GTFSFile gtfsFile : gtfsFiles) {
-			gtfsFile.iterateThroughContents("calendar.txt", gtfsCsv -> {
-				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
-					String service_id = gtfsEntry.getField("service_id");
-					if (serviceIds.contains(service_id)) {
-						for(WorkingTripDepartureRoute workingTripDepartureRoute : trips) {
-							if(workingTripDepartureRoute.gtfsFile != gtfsFile) {
-								continue;
-							}
-							if(service_id.equals(workingTripDepartureRoute.service_id)) {
-								boolean[] weekdays = new boolean[] {
-										gtfsEntry.getField("monday").equals("1"),
-										gtfsEntry.getField("tuesday").equals("1"),
-										gtfsEntry.getField("wednesday").equals("1"),
-										gtfsEntry.getField("thursday").equals("1"),
-										gtfsEntry.getField("friday").equals("1"),
-										gtfsEntry.getField("saturday").equals("1"),
-										gtfsEntry.getField("sunday").equals("1"),
-								};
-								try {
-									workingTripDepartureRoute.serviceCalendarData = new ServiceCalendarData(weekdays, dateFormat.parse(gtfsEntry.getField("start_date")), dateFormat.parse(gtfsEntry.getField("end_date")));
-								} catch(ParseException ex) {
-									ex.printStackTrace();
-									throw new IOException("Error parsing date format");
-								}
-							}
-						}
-					}
-				});
-			});
-		}
-		System.out.println("Getting calendar exceptions");
-		for (GTFSFile gtfsFile : gtfsFiles) {
-			gtfsFile.iterateThroughContents("calendar_dates.txt", gtfsCsv -> {
-				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
-					String service_id = gtfsEntry.getField("service_id");
-					if (serviceIds.contains(service_id)) {
-						for(WorkingTripDepartureRoute workingTripDepartureRoute : trips) {
-							if(workingTripDepartureRoute.gtfsFile != gtfsFile) {
-								continue;
-							}
-							if(service_id.equals(workingTripDepartureRoute.service_id)) {
-								String exception_type = gtfsEntry.getField("exception_type");
-								if(exception_type.equals("1")) {
-									workingTripDepartureRoute.serviceCalendarData.datesAdded.add(gtfsEntry.getField("date"));
-								} else if(exception_type.equals("2")) {
-									workingTripDepartureRoute.serviceCalendarData.datesRemoved.add(gtfsEntry.getField("date"));
-								} else {
-									throw new IOException("Unknown exception_type " + exception_type);
-								}
-							}
-						}
-					}
-				});
-			});
-		}
+		*/
 
 		System.out.println("Building departures");
+		System.out.println(time);
 		for (WorkingTripDepartureRoute wtdr : trips) {
 			try {
-				Date departureTime = wtdr.serviceCalendarData.nextDate(time, timeFormat.parse(wtdr.departure_time));
-				System.out.println(time);
-				System.out.println(wtdr.serviceCalendarData.startDate);
-				System.out.println(wtdr.serviceCalendarData.endDate);
-				for (boolean wd : wtdr.serviceCalendarData.weekdays)
-					System.out.println(wd);
-				System.out.println(departureTime);
-				if (departureTime != null) {
-					stationDepartures.departures.add(new Departure(departureTime, null, wtdr.line, null, null, null, null));
-					break;
+				// Ignore bogus entries
+				if (wtdr.serviceCalendarData != null) {
+					System.out.println(wtdr.departure_time);
+					System.out.println(timeFormat.parse(wtdr.departure_time));
+					Date departureTime = wtdr.serviceCalendarData.nextDate(time, timeFormat.parse(wtdr.departure_time));
+					System.out.println(departureTime);
+					if(departureTime != null) {
+						stationDepartures.departures.add(new Departure(
+								departureTime,
+								null,
+								wtdr.line,
+								null,
+								new Location(LocationType.STATION, wtdr.trip_id + "_destination", null, wtdr.trip_headsign),
+								null,
+								null
+						));
+					}
 				}
 			} catch (ParseException ex) {
 				ex.printStackTrace();
