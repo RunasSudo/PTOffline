@@ -36,7 +36,7 @@ import io.github.runassudo.ptoffline.utils.TransportrUtils;
 
 public abstract class GTFSCSV {
 	String name;
-	List<String> fieldsReversed;
+	public List<String> fieldsReversed;
 	HashMap<String, Integer> fields = new HashMap<>();
 
 	GTFSCSV(String name) {

@@ -18,6 +18,7 @@
 
 package io.github.runassudo.ptoffline.pte;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -36,6 +37,7 @@ import java.util.TreeSet;
 import javax.annotation.Nullable;
 
 import io.github.runassudo.gtfs.GTFSCollection;
+import io.github.runassudo.gtfs.GTFSEntry;
 import io.github.runassudo.gtfs.GTFSFile;
 import io.github.runassudo.ptoffline.pte.dto.Departure;
 import io.github.runassudo.ptoffline.pte.dto.Line;
@@ -349,15 +351,31 @@ public class PtvProvider extends AbstractNetworkProvider
 		ArrayList<String> tripIds = new ArrayList<>();
 		for (GTFSFile gtfsFile : gtfsFiles) {
 			gtfsFile.iterateThroughContents("stop_times.txt", gtfsCsv -> {
-				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
-					String stop_id = gtfsEntry.getField("stop_id");
-					//System.out.println(stop_id);
-					if(stop_id.equals(stationId)) {
-						String trip_id = gtfsEntry.getField("trip_id");
-						trips.add(new WorkingTripDepartureRoute(trip_id, gtfsEntry.getField("departure_time"), gtfsFile));
-						tripIds.add(trip_id);
+				// Manual implementation for improved performance
+				BufferedReader reader = gtfsCsv.getBufferedReader();
+
+				String line = reader.readLine();
+				// Handle BOM
+				if (line.startsWith("\ufeff")) {
+					line = line.substring(1);
+				}
+				gtfsCsv.fieldsReversed = Arrays.asList(line.split(","));
+
+				while((line = reader.readLine()) != null) {
+					// String.split is expensive, so we want to avoid it if at all possible
+					if (line.contains(stationId)) {
+						String[] fields = line.split(",");
+						GTFSEntry gtfsEntry = new GTFSEntry(gtfsCsv, fields);
+						String stop_id = gtfsEntry.getField("stop_id");
+						if(stop_id.equals(stationId)) {
+							String trip_id = gtfsEntry.getField("trip_id");
+							trips.add(new WorkingTripDepartureRoute(trip_id, gtfsEntry.getField("departure_time"), gtfsFile));
+							tripIds.add(trip_id);
+						}
 					}
-				});
+				}
+
+				reader.close();
 			});
 		}
 		System.out.println("Found " + trips.size() + " trips");
@@ -369,25 +387,21 @@ public class PtvProvider extends AbstractNetworkProvider
 			HashMap<String, ServiceCalendarData> thisFileCalendarDataMap = calendarDataMap.get(gtfsFile);
 			gtfsFile.iterateThroughContents("trips.txt", gtfsCsv -> {
 				gtfsCsv.iterateThroughEntries(gtfsEntry -> {
-					// Most of these are bogus anyway
-					String service_id = gtfsEntry.getField("service_id");
-					if (thisFileCalendarDataMap.containsKey(service_id) && thisFileCalendarDataMap.get(service_id).nextDate != null) {
-						// Looking promising
-						String trip_id = gtfsEntry.getField("trip_id");
-						if(tripIds.contains(trip_id)) {
-							for(WorkingTripDepartureRoute workingTripDepartureRoute : trips) {
-								if(workingTripDepartureRoute.gtfsFile != gtfsFile) {
-									continue;
-								}
-								if(trip_id.equals(workingTripDepartureRoute.trip_id)) {
-									String route_id = gtfsEntry.getField("route_id");
-									//workingTripDepartureRoute.route_id = route_id;
-									workingTripDepartureRoute.service_id = service_id;
-									routeIds.add(route_id);
-									workingTripDepartureRoute.serviceCalendarData = thisFileCalendarDataMap.get(service_id);
-									workingTripDepartureRoute.trip_headsign = gtfsEntry.getField("trip_headsign");
-									workingTripDepartureRoute.line = new Line(route_id, null, null, workingTripDepartureRoute.trip_headsign);
-								}
+					String trip_id = gtfsEntry.getField("trip_id");
+					if(tripIds.contains(trip_id)) {
+						for(WorkingTripDepartureRoute workingTripDepartureRoute : trips) {
+							if(workingTripDepartureRoute.gtfsFile != gtfsFile) {
+								continue;
+							}
+							if(trip_id.equals(workingTripDepartureRoute.trip_id)) {
+								String route_id = gtfsEntry.getField("route_id");
+								//workingTripDepartureRoute.route_id = route_id;
+								String service_id = gtfsEntry.getField("service_id");
+								workingTripDepartureRoute.service_id = service_id;
+								routeIds.add(route_id);
+								workingTripDepartureRoute.serviceCalendarData = thisFileCalendarDataMap.get(service_id);
+								workingTripDepartureRoute.trip_headsign = gtfsEntry.getField("trip_headsign");
+								workingTripDepartureRoute.line = new Line(route_id, null, null, workingTripDepartureRoute.trip_headsign);
 							}
 						}
 					}
@@ -423,23 +437,17 @@ public class PtvProvider extends AbstractNetworkProvider
 		System.out.println(time);
 		for (WorkingTripDepartureRoute wtdr : trips) {
 			try {
-				// Ignore bogus entries
-				if (wtdr.serviceCalendarData != null) {
-					System.out.println(wtdr.departure_time);
-					System.out.println(timeFormat.parse(wtdr.departure_time));
-					Date departureTime = wtdr.serviceCalendarData.nextDate(time, timeFormat.parse(wtdr.departure_time));
-					System.out.println(departureTime);
-					if(departureTime != null) {
-						stationDepartures.departures.add(new Departure(
-								departureTime,
-								null,
-								wtdr.line,
-								null,
-								new Location(LocationType.STATION, wtdr.trip_id + "_destination", null, wtdr.trip_headsign),
-								null,
-								null
-						));
-					}
+				Date departureTime = wtdr.serviceCalendarData.nextDate(time, timeFormat.parse(wtdr.departure_time));
+				if(departureTime != null) {
+					stationDepartures.departures.add(new Departure(
+							departureTime,
+							null,
+							wtdr.line,
+							null,
+							new Location(LocationType.STATION, wtdr.trip_id + "_destination", null, wtdr.trip_headsign),
+							null,
+							null
+					));
 				}
 			} catch (ParseException ex) {
 				ex.printStackTrace();
