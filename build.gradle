@@ -54,7 +54,7 @@ android {
 		compileSdkVersion 25
 		targetSdkVersion 25
 		buildToolsVersion "25.0.2"
-		minSdkVersion 15
+		minSdkVersion 19
 
 		jackOptions {
 			enabled true

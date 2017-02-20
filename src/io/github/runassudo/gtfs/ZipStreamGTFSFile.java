@@ -18,10 +18,15 @@
 
 package io.github.runassudo.gtfs;
 
+import com.google.common.hash.Hashing;
+
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -44,5 +49,29 @@ public class ZipStreamGTFSFile extends GTFSFile {
 		while ((contentEntry = gtfsStream.getNextZipEntry()) != null) {
 			callback.call(new ZipStreamGTFSCSV(gtfsStream, contentEntry));
 		}
+	}
+
+	public FlatGTFSFile toFlatFile() throws IOException {
+		File destBase = new File(GTFSCollection.cacheDir, Hashing.sha256().hashString(zipEntry.getName(), StandardCharsets.UTF_8).toString());
+
+		if (!destBase.exists()) {
+			ZipArchiveInputStream gtfsStream = new ZipArchiveInputStream(parentFile.getInputStream(zipEntry));
+			ZipArchiveEntry contentEntry;
+			while((contentEntry = gtfsStream.getNextZipEntry()) != null) {
+				// Copy this file to cache
+				File dest = new File(destBase, contentEntry.getName());
+				dest.getParentFile().mkdirs();
+				FileOutputStream os = new FileOutputStream(dest);
+				byte[] buf = new byte[4096];
+				int len;
+				while((len = gtfsStream.read(buf)) > 0) {
+					os.write(buf, 0, len);
+				}
+				os.close();
+			}
+			gtfsStream.close();
+		}
+
+		return new FlatGTFSFile(destBase);
 	}
 }

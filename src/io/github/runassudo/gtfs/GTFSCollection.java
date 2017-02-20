@@ -32,6 +32,8 @@ import java.util.zip.ZipFile;
  */
 
 public class GTFSCollection {
+	public static File cacheDir;
+
 	File file;
 
 	public GTFSCollection(File file) {

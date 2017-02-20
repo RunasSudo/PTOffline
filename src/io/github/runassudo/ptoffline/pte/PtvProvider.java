@@ -79,6 +79,10 @@ public class PtvProvider extends AbstractNetworkProvider
 		}
 	}
 
+	GTFSCollection getGTFSCollection() {
+		return new GTFSCollection(new File("/sdcard/gtfs.zip"));
+	}
+
 	class WorkingNearbyLocation {
 		Location location;
 		double distance;
@@ -101,7 +105,7 @@ public class PtvProvider extends AbstractNetworkProvider
 		// TreeSet is sorted, so we can keep only the "maxLocations" closest in memory
 		TreeSet<WorkingNearbyLocation> locations = new TreeSet<>((l1, l2) -> (int) (l1.distance - l2.distance));
 
-		GTFSCollection gtfsCollection = new GTFSCollection(new File("/sdcard/gtfs.zip"));
+		GTFSCollection gtfsCollection = getGTFSCollection();
 		gtfsCollection.iterateThroughContents("stops.txt", gtfsCsv -> {
 			final boolean[] done = new boolean[] { false }; // DODGY!
 			gtfsCsv.iterateThroughEntries(gtfsEntry -> {
@@ -241,7 +245,7 @@ public class PtvProvider extends AbstractNetworkProvider
 		String service_id;
 		ServiceCalendarData serviceCalendarData;
 
-		//String route_id;
+		String route_id;
 		Line line;
 		String trip_headsign;
 
@@ -265,8 +269,8 @@ public class PtvProvider extends AbstractNetworkProvider
 		// Otherwise it will be *very* slow looping through all of them
 		System.out.println("Getting stop");
 		final Location[] station_ = new Location[] { null }; // DODGY!
-		final ArrayList<GTFSFile> gtfsFiles = new ArrayList<>();
-		GTFSCollection gtfsCollection = new GTFSCollection(new File("/sdcard/gtfs.zip"));
+		final HashSet<GTFSFile> gtfsFiles = new HashSet<>();
+		GTFSCollection gtfsCollection = getGTFSCollection();
 		gtfsCollection.iterateThroughMembers(gtfsFile -> {
 			gtfsFile.iterateThroughContents(gtfsCsv -> {
 				if (gtfsCsv.getName().equals("stops.txt")) {
@@ -277,6 +281,8 @@ public class PtvProvider extends AbstractNetworkProvider
 
 						String id = gtfsEntry.getField("stop_id");
 						if(id.equals(stationId)) {
+							// Cache this file
+							//gtfsFiles.add(gtfsFile.toFlatFile());
 							gtfsFiles.add(gtfsFile);
 
 							String name = gtfsEntry.getField("stop_name");
@@ -361,8 +367,10 @@ public class PtvProvider extends AbstractNetworkProvider
 				}
 				gtfsCsv.fieldsReversed = Arrays.asList(line.split(","));
 
+				System.out.println("Begin reading file: " + new Date());
 				while((line = reader.readLine()) != null) {
 					// String.split is expensive, so we want to avoid it if at all possible
+					/*
 					if (line.contains(stationId)) {
 						String[] fields = line.split(",");
 						GTFSEntry gtfsEntry = new GTFSEntry(gtfsCsv, fields);
@@ -372,8 +380,9 @@ public class PtvProvider extends AbstractNetworkProvider
 							trips.add(new WorkingTripDepartureRoute(trip_id, gtfsEntry.getField("departure_time"), gtfsFile));
 							tripIds.add(trip_id);
 						}
-					}
+					}*/
 				}
+				System.out.println("End reading file: " + new Date());
 
 				reader.close();
 			});
@@ -395,13 +404,12 @@ public class PtvProvider extends AbstractNetworkProvider
 							}
 							if(trip_id.equals(workingTripDepartureRoute.trip_id)) {
 								String route_id = gtfsEntry.getField("route_id");
-								//workingTripDepartureRoute.route_id = route_id;
+								workingTripDepartureRoute.route_id = route_id;
 								String service_id = gtfsEntry.getField("service_id");
 								workingTripDepartureRoute.service_id = service_id;
 								routeIds.add(route_id);
 								workingTripDepartureRoute.serviceCalendarData = thisFileCalendarDataMap.get(service_id);
 								workingTripDepartureRoute.trip_headsign = gtfsEntry.getField("trip_headsign");
-								workingTripDepartureRoute.line = new Line(route_id, null, null, workingTripDepartureRoute.trip_headsign);
 							}
 						}
 					}
@@ -409,7 +417,6 @@ public class PtvProvider extends AbstractNetworkProvider
 			});
 		}
 
-		/*
 		// Get details for route
 		System.out.println("Getting route details");
 		for (GTFSFile gtfsFile : gtfsFiles) {
@@ -422,19 +429,15 @@ public class PtvProvider extends AbstractNetworkProvider
 								continue;
 							}
 							if(route_id.equals(workingTripDepartureRoute.route_id)) {
-								workingTripDepartureRoute.route_long_name = gtfsEntry.getField("route_long_name");
-								Line line = new Line(route_id, null, null, gtfsEntry.getField("route_short_name"));
-								workingTripDepartureRoute.line = line;
+								workingTripDepartureRoute.line = new Line(route_id, null, null, gtfsEntry.getField("route_short_name"), null, gtfsEntry.getField("route_long_name"));
 							}
 						}
 					}
 				});
 			});
 		}
-		*/
 
 		System.out.println("Building departures");
-		System.out.println(time);
 		for (WorkingTripDepartureRoute wtdr : trips) {
 			try {
 				Date departureTime = wtdr.serviceCalendarData.nextDate(time, timeFormat.parse(wtdr.departure_time));
@@ -463,7 +466,7 @@ public class PtvProvider extends AbstractNetworkProvider
 	public SuggestLocationsResult suggestLocations(CharSequence constraint) throws IOException {
 		ArrayList<SuggestedLocation> locations = new ArrayList<>();
 
-		GTFSCollection gtfsCollection = new GTFSCollection(new File("/sdcard/gtfs.zip"));
+		GTFSCollection gtfsCollection = getGTFSCollection();
 		gtfsCollection.iterateThroughContents("stops.txt", gtfsCsv -> {
 			gtfsCsv.iterateThroughEntries(gtfsEntry -> {
 				String name = gtfsEntry.getField("stop_name");

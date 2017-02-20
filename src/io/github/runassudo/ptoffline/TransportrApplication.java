@@ -20,6 +20,8 @@ package io.github.runassudo.ptoffline;
 import android.app.Application;
 import android.content.Context;
 
+import io.github.runassudo.gtfs.GTFSCollection;
+
 public class TransportrApplication extends Application {
 	private TransportNetworks networks;
 
@@ -30,6 +32,7 @@ public class TransportrApplication extends Application {
 		super.onCreate();
 
 		context = getApplicationContext();
+		GTFSCollection.cacheDir = context.getCacheDir();
 
 		initializeNetworks(getBaseContext());
 	}

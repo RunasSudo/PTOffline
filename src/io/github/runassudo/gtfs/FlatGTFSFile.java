@@ -18,33 +18,32 @@
 
 package io.github.runassudo.gtfs;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+
+import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Created by runassudo on 19/02/17.
  */
 
-public abstract class GTFSFile {
-	public abstract void iterateThroughContents(IterateThroughContentsCallback callback) throws IOException;
+public class FlatGTFSFile extends GTFSFile {
+	File base;
 
-	public abstract FlatGTFSFile toFlatFile() throws IOException;
-
-	public interface IterateThroughContentsCallback {
-		void call(GTFSCSV gtfsCsv) throws IOException;
+	public FlatGTFSFile(File base) {
+		this.base = base;
 	}
 
-	public void iterateThroughContents(String[] files, GTFSFile.IterateThroughContentsCallback... callbacks) throws IOException {
-		List<String> filesList = Arrays.asList(files);
-		iterateThroughContents(gtfsCsv -> {
-			if (filesList.contains(gtfsCsv.getName())) {
-				callbacks[filesList.indexOf(gtfsCsv.getName())].call(gtfsCsv);
-			}
-		});
+	public void iterateThroughContents(IterateThroughContentsCallback callback) throws IOException {
+		for (File f : base.listFiles()) {
+			callback.call(new FlatGTFSCSV(f));
+		}
 	}
 
-	public void iterateThroughContents(String file, GTFSFile.IterateThroughContentsCallback callback) throws IOException {
-		iterateThroughContents(new String[] {file}, callback);
+	public FlatGTFSFile toFlatFile() throws IOException {
+		return this;
 	}
 }
