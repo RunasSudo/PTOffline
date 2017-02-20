@@ -18,9 +18,13 @@
 
 package io.github.runassudo.ptoffline.pte;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ import java.util.TreeSet;
 
 import javax.annotation.Nullable;
 
+import io.github.runassudo.gtfs.FlatGTFSCSV;
 import io.github.runassudo.gtfs.GTFSCollection;
 import io.github.runassudo.gtfs.GTFSEntry;
 import io.github.runassudo.gtfs.GTFSFile;
@@ -282,8 +287,8 @@ public class PtvProvider extends AbstractNetworkProvider
 						String id = gtfsEntry.getField("stop_id");
 						if(id.equals(stationId)) {
 							// Cache this file
-							//gtfsFiles.add(gtfsFile.toFlatFile());
-							gtfsFiles.add(gtfsFile);
+							gtfsFiles.add(gtfsFile.toFlatFile());
+							//gtfsFiles.add(gtfsFile);
 
 							String name = gtfsEntry.getField("stop_name");
 							double lat = Double.parseDouble(gtfsEntry.getField("stop_lat"));
@@ -357,34 +362,32 @@ public class PtvProvider extends AbstractNetworkProvider
 		ArrayList<String> tripIds = new ArrayList<>();
 		for (GTFSFile gtfsFile : gtfsFiles) {
 			gtfsFile.iterateThroughContents("stop_times.txt", gtfsCsv -> {
-				// Manual implementation for improved performance
-				BufferedReader reader = gtfsCsv.getBufferedReader();
+				File file = ((FlatGTFSCSV) gtfsCsv).file;
 
+				// Get data
+				BufferedReader reader = gtfsCsv.getBufferedReader();
 				String line = reader.readLine();
 				// Handle BOM
 				if (line.startsWith("\ufeff")) {
 					line = line.substring(1);
 				}
 				gtfsCsv.fieldsReversed = Arrays.asList(line.split(","));
-
-				System.out.println("Begin reading file: " + new Date());
-				while((line = reader.readLine()) != null) {
-					// String.split is expensive, so we want to avoid it if at all possible
-					/*
-					if (line.contains(stationId)) {
-						String[] fields = line.split(",");
-						GTFSEntry gtfsEntry = new GTFSEntry(gtfsCsv, fields);
-						String stop_id = gtfsEntry.getField("stop_id");
-						if(stop_id.equals(stationId)) {
-							String trip_id = gtfsEntry.getField("trip_id");
-							trips.add(new WorkingTripDepartureRoute(trip_id, gtfsEntry.getField("departure_time"), gtfsFile));
-							tripIds.add(trip_id);
-						}
-					}*/
-				}
-				System.out.println("End reading file: " + new Date());
-
 				reader.close();
+
+				// UNLEASH THE SUPER DODGY HACK!
+				// BufferedReader is waaaay too slow for the whole file (approx. 15-20 seconds for buses)
+				Process proc = new ProcessBuilder("grep", stationId, file.getPath()).start();
+				reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				while((line = reader.readLine()) != null) {
+					String[] fields = line.split(",");
+					GTFSEntry gtfsEntry = new GTFSEntry(gtfsCsv, fields);
+					String stop_id = gtfsEntry.getField("stop_id");
+					if(stop_id.equals(stationId)) {
+						String trip_id = gtfsEntry.getField("trip_id");
+						trips.add(new WorkingTripDepartureRoute(trip_id, gtfsEntry.getField("departure_time"), gtfsFile));
+						tripIds.add(trip_id);
+					}
+				}
 			});
 		}
 		System.out.println("Found " + trips.size() + " trips");
@@ -429,7 +432,7 @@ public class PtvProvider extends AbstractNetworkProvider
 								continue;
 							}
 							if(route_id.equals(workingTripDepartureRoute.route_id)) {
-								workingTripDepartureRoute.line = new Line(route_id, null, null, gtfsEntry.getField("route_short_name"), null, gtfsEntry.getField("route_long_name"));
+								workingTripDepartureRoute.line = new Line(route_id, null, null, gtfsEntry.getField("route_short_name"), gtfsEntry.getField("route_long_name"), null);
 							}
 						}
 					}

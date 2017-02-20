@@ -34,7 +34,7 @@ import java.io.InputStreamReader;
  */
 
 public class FlatGTFSCSV extends GTFSCSV {
-	File file;
+	public File file;
 
 	public FlatGTFSCSV(File file) {
 		super(file.getName());
