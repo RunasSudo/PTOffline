@@ -524,6 +524,16 @@ public class PtvProvider extends AbstractNetworkProvider
 			this.depatrure_time = depatrure_time;
 			this.stop_id = stop_id;
 		}
+
+		public Location toLocation() {
+			return new Location(LocationType.STATION, stop_id, Point.fromDouble(lat, lon), null, name);
+		}
+
+		public Stop toStop(WorkingTrip trip, Date date) throws ParseException {
+			Date firstArrivalTime = trip.serviceCalendarData.nextDate(date, timeFormat.parse(arrival_time));
+			Date firstDepartureTime = trip.serviceCalendarData.nextDate(date, timeFormat.parse(depatrure_time));
+			return new Stop(toLocation(), firstArrivalTime, null, null, null, false, firstDepartureTime, null, null, null, false);
+		}
 	}
 
 	public QueryTripsResult queryTrips(Location from, @Nullable Location via, Location to, Date date, boolean dep,
@@ -673,17 +683,19 @@ public class PtvProvider extends AbstractNetworkProvider
 			try {
 				WorkingTripStop firstStop = trip.stops.get(start_index);
 				Location firstLocation = new Location(LocationType.STATION, firstStop.stop_id, Point.fromDouble(firstStop.lat, firstStop.lon), null, firstStop.name);
-				Date firstArrivalTime = trip.serviceCalendarData.nextDate(date, timeFormat.parse(firstStop.arrival_time));
-				Date firstDepartureTime = trip.serviceCalendarData.nextDate(date, timeFormat.parse(firstStop.depatrure_time));
 				WorkingTripStop lastStop = trip.stops.get(trip.stops.size() - 1);
 				Location lastLocation = new Location(LocationType.STATION, lastStop.stop_id, Point.fromDouble(lastStop.lat, lastStop.lon), null, lastStop.name);
-				Date lastArrivalTime = trip.serviceCalendarData.nextDate(date, timeFormat.parse(lastStop.arrival_time));
-				Date lastDepartureTime = trip.serviceCalendarData.nextDate(date, timeFormat.parse(lastStop.depatrure_time));
+
+				ArrayList<Stop> intermediateStops = new ArrayList<>();
+				for (int i = start_index + 1; i < trip.stops.size() - 1; i++) {
+					intermediateStops.add(trip.stops.get(i).toStop(trip, date));
+				}
+
 				Trip.Public leg = new Trip.Public(trip.line,
-						lastLocation,
-						new Stop(firstLocation, firstArrivalTime, null, null, null, false, firstDepartureTime, null, null, null, false),
-						new Stop(lastLocation, lastArrivalTime, null, null, null, false, lastDepartureTime, null, null, null, false),
-						null,
+						lastStop.toLocation(),
+						firstStop.toStop(trip, date),
+						lastStop.toStop(trip, date),
+						intermediateStops,
 						null,
 						null
 				);
