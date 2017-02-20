@@ -52,7 +52,7 @@ public class ZipStreamGTFSFile extends GTFSFile {
 	}
 
 	public FlatGTFSFile toFlatFile() throws IOException {
-		File destBase = new File(GTFSCollection.cacheDir, Hashing.sha256().hashString(zipEntry.getName(), StandardCharsets.UTF_8).toString());
+		File destBase = new File(new File(GTFSCollection.cacheDir, Hashing.sha256().hashString(parentFile.getName(), StandardCharsets.UTF_8).toString()), Hashing.sha256().hashString(zipEntry.getName(), StandardCharsets.UTF_8).toString());
 
 		if (!destBase.exists()) {
 			ZipArchiveInputStream gtfsStream = new ZipArchiveInputStream(parentFile.getInputStream(zipEntry));
